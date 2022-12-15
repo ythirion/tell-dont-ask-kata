@@ -1,14 +1,8 @@
 package usecase
 
 import doubles.TestOrderRepository
-import ordershipping.domain.{Order, OrderStatus}
-import ordershipping.usecase.{
-  ApprovedOrderCannotBeRejectedException,
-  OrderApprovalRequest,
-  OrderApprovalUseCase,
-  RejectedOrderCannotBeApprovedException,
-  ShippedOrdersCannotBeChangedException
-}
+import ordershipping.domain.OrderStatus
+import ordershipping.usecase._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -37,8 +31,8 @@ class OrderApprovalUseCaseTest
     savedOrder.status shouldBe OrderStatus.Approved
   }
 
-  "order approval use case" should "rejected existing order" in {
-    val initialOrder = new Order(status = OrderStatus.Created, id = 1)
+  "order approval use case" should "reject existing order" in {
+    val initialOrder = anOrder().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderApprovalRequest(orderId = 1, approved = false)
 
@@ -49,7 +43,10 @@ class OrderApprovalUseCaseTest
   }
 
   "order approval use case" should "can not approve rejected order" in {
-    val initialOrder = new Order(status = OrderStatus.Rejected, id = 1)
+    val initialOrder = anOrder()
+      .rejected()
+      .build()
+
     orderRepository.addOrder(initialOrder)
     val request = OrderApprovalRequest(orderId = 1, approved = true)
 
@@ -60,7 +57,11 @@ class OrderApprovalUseCaseTest
   }
 
   "order approval use case" should "can not reject approved order" in {
-    val initialOrder = new Order(status = OrderStatus.Approved, id = 1)
+    val initialOrder =
+      anOrder()
+        .approved()
+        .build()
+
     orderRepository.addOrder(initialOrder)
     val request = OrderApprovalRequest(orderId = 1, approved = false)
 
@@ -71,7 +72,10 @@ class OrderApprovalUseCaseTest
   }
 
   "order approval use case" should "can not reject shipped order" in {
-    val initialOrder = new Order(status = OrderStatus.Shipped, id = 1)
+    val initialOrder = anOrder()
+      .shipped()
+      .build()
+
     orderRepository.addOrder(initialOrder)
     val request = OrderApprovalRequest(orderId = 1, approved = false)
 
