@@ -1,23 +1,14 @@
 package ordershipping.usecase
 
-import ordershipping.domain.{Order, OrderItem, OrderStatus}
+import ordershipping.domain.{Order, OrderItem}
 import ordershipping.repository.{OrderRepository, ProductCatalog}
-
-import scala.collection.mutable
 
 class OrderCreationUseCase(
     val orderRepository: OrderRepository,
     val productCatalog: ProductCatalog
 ) {
   def run(request: SellItemsRequest): Unit = {
-    val order = new Order(
-      total = 0d,
-      currency = "EUR",
-      items = mutable.MutableList.empty,
-      tax = 0d,
-      status = OrderStatus.Created,
-      id = 1
-    )
+    val order = Order.create()
 
     for (itemRequest <- request.requests) {
       val product = productCatalog.getByName(itemRequest.productName)

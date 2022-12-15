@@ -86,4 +86,5 @@ class OrderShipmentUseCaseTest
 
   private def assertSavedOrder(assertions: Order => Unit): Unit =
     assertions(orderRepository.savedOrder())
+
 }
