@@ -1,10 +1,10 @@
 package ordershipping.domain
 
 class OrderItem private (
-    val product: ordershipping.domain.Product,
-    var quantity: Int,
-    var taxedAmount: Double,
-    var tax: Double
+    val product: Product,
+    val quantity: Int,
+    val taxedAmount: Double,
+    val tax: Double
 )
 
 object OrderItem {

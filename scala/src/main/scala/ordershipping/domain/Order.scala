@@ -3,12 +3,13 @@ package ordershipping.domain
 import ordershipping.domain.OrderItem.createOrderItem
 import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejected, Shipped}
 
-// TODO : make it private
-class Order(
-    var currency: String = "",
-    var items: List[OrderItem] = List.empty,
+import scala.collection.immutable
+
+class Order private (
+    val currency: String = "",
+    val items: Seq[OrderItem],
     var status: OrderStatus,
-    var id: Int
+    val id: Int
 ) {
   def approve(): Unit = {
     ifNotShipped { order =>
@@ -51,18 +52,16 @@ class Order(
 }
 
 object Order {
-  def create(items: Map[Product, Int]): Order = {
-    val order = new Order(
+  def create(items: Map[Product, Int]): Order =
+    new Order(
       currency = "EUR",
-      items = List.empty,
+      items = toOrderItems(items),
       status = Created,
       id = 1
     )
 
-    order.items = items.map {
+  private def toOrderItems(items: Map[Product, Int]): immutable.Seq[OrderItem] =
+    items.map {
       case (product, quantity) => createOrderItem(product, quantity)
     }.toList
-
-    order
-  }
 }
