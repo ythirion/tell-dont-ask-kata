@@ -6,8 +6,8 @@ import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejecte
 import scala.collection.immutable
 
 class Order private (
-    val currency: String = "",
-    val items: Seq[OrderItem],
+    private val currency: String,
+    private val items: Seq[OrderItem],
     private var _status: OrderStatus = Created,
     val id: Int
 ) {

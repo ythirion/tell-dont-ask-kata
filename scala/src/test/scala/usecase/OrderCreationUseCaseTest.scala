@@ -2,16 +2,12 @@ package usecase
 
 import builders.ProductBuilder._
 import doubles.{InMemoryProductCatalog, TestOrderRepository}
-import ordershipping.domain.OrderStatus._
 import ordershipping.usecase.creation.{OrderCreationUseCase, SellItemRequest, SellItemsRequest, UnknownProductException}
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers
+import org.approvaltests.Approvals._
+import org.junit.jupiter.api.{BeforeEach, Test}
+import org.scalatest.Assertions.assertThrows
 
-class OrderCreationUseCaseTest
-    extends AnyFlatSpec
-    with Matchers
-    with BeforeAndAfterEach {
+class OrderCreationUseCaseTest {
   private val productCatalog = new InMemoryProductCatalog(
     List(
       food("salad").costing(3.56).build(),
@@ -21,7 +17,8 @@ class OrderCreationUseCaseTest
   private var orderRepository: TestOrderRepository = _
   private var useCase: OrderCreationUseCase = _
 
-  override def beforeEach(): Unit = {
+  @BeforeEach
+  def setup(): Unit = {
     orderRepository = new TestOrderRepository()
     useCase = new OrderCreationUseCase(
       orderRepository = orderRepository,
@@ -29,7 +26,8 @@ class OrderCreationUseCaseTest
     )
   }
 
-  "order creation use case" should "sell multiple items" in {
+  @Test
+  def OrderCreationUseCaseShouldSellMultipleItems(): Unit = {
     val saladRequest = SellItemRequest(productName = "salad", quantity = 2)
     val tomatoRequest = SellItemRequest(productName = "tomato", quantity = 3)
 
@@ -39,26 +37,13 @@ class OrderCreationUseCaseTest
 
     useCase.run(request)
 
-    val insertedOrder = orderRepository.savedOrder()
-    insertedOrder.status shouldBe Created
-    insertedOrder.total shouldBe 23.20
-    insertedOrder.tax shouldBe 2.13
-    insertedOrder.currency shouldBe "EUR"
-    insertedOrder.items.length shouldBe 2
-    insertedOrder.items.head.product.name shouldBe "salad"
-    insertedOrder.items.head.product.price shouldBe 3.56
-    insertedOrder.items.head.quantity shouldBe 2
-    insertedOrder.items.head.taxedAmount shouldBe 7.84
-    insertedOrder.items.head.tax shouldBe 0.72
-
-    insertedOrder.items(1).product.name shouldBe "tomato"
-    insertedOrder.items(1).product.price shouldBe 4.65
-    insertedOrder.items(1).quantity shouldBe 3
-    insertedOrder.items(1).taxedAmount shouldBe 15.36
-    insertedOrder.items(1).tax shouldBe 1.41
+    verify(
+      orderRepository.savedOrder()
+    )
   }
 
-  "order creation use case" should "unknown product" in {
+  @Test
+  def OrderCreationUseCaseShouldFailWithUnknownProduct: Unit = {
     val request = SellItemsRequest(
       List(SellItemRequest(productName = "unknown product", quantity = 0))
     )
