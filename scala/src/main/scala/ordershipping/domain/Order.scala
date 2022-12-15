@@ -1,33 +1,21 @@
 package ordershipping.domain
 
 import ordershipping.domain.OrderItem.createOrderItem
-import ordershipping.domain.OrderStatus.{
-  Approved,
-  Created,
-  OrderStatus,
-  Rejected,
-  Shipped
-}
-// TODO : this layer should not access those exceptions -> move them inside Domain
-import ordershipping.usecase.{
-  ApprovedOrderCannotBeRejectedException,
-  RejectedOrderCannotBeApprovedException,
-  ShippedOrdersCannotBeChangedException
-}
+import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejected, Shipped}
 
 // TODO : make it private
 class Order(
-    var currency: String = "",
-    var items: List[OrderItem] = List.empty,
-    var status: OrderStatus,
-    var id: Int
-) {
+             var currency: String = "",
+             var items: List[OrderItem] = List.empty,
+             var status: OrderStatus,
+             var id: Int
+           ) {
 
   def approve(): Unit = {
     ifNotShipped { order =>
       order.status match {
         case Rejected => throw new RejectedOrderCannotBeApprovedException
-        case _        => order.status = Approved
+        case _ => order.status = Approved
       }
     }
   }
@@ -36,7 +24,7 @@ class Order(
     ifNotShipped { order =>
       order.status match {
         case Approved => throw new ApprovedOrderCannotBeRejectedException
-        case _        => order.status = Rejected
+        case _ => order.status = Rejected
       }
     }
   }

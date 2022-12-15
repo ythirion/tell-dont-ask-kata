@@ -3,7 +3,7 @@ package usecase
 import builders.OrderBuilder
 import builders.OrderBuilder.anOrder
 import doubles.TestOrderRepository
-import ordershipping.domain.{Order, OrderStatus}
+import ordershipping.domain._
 import ordershipping.usecase._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
