@@ -5,17 +5,17 @@ import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejecte
 
 import scala.collection.immutable
 
-class Order private (
-    val currency: String = "",
-    val items: Seq[OrderItem],
-    var status: OrderStatus,
-    val id: Int
-) {
+class Order private(
+                     val currency: String = "",
+                     val items: Seq[OrderItem],
+                     var status: OrderStatus,
+                     val id: Int
+                   ) {
   def approve(): Unit = {
     ifNotShipped { order =>
       order.status match {
         case Rejected => throw new RejectedOrderCannotBeApprovedException
-        case _        => order.status = Approved
+        case _ => order.status = Approved
       }
     }
   }
@@ -24,7 +24,7 @@ class Order private (
     ifNotShipped { order =>
       order.status match {
         case Approved => throw new ApprovedOrderCannotBeRejectedException
-        case _        => order.status = Rejected
+        case _ => order.status = Rejected
       }
     }
   }
@@ -39,7 +39,7 @@ class Order private (
   def ship(ship: Order => Unit): Unit = {
     status match {
       case Created | Rejected => throw new OrderCannotBeShippedException
-      case Shipped            => throw new OrderCannotBeShippedTwiceException
+      case Shipped => throw new OrderCannotBeShippedTwiceException
       case _ =>
         ship(this)
         status = OrderStatus.Shipped

@@ -1,30 +1,26 @@
 package ordershipping.domain
 
-class OrderItem private (
-    val product: Product,
-    val quantity: Int,
-    val taxedAmount: Double,
-    val tax: Double
-)
+import ordershipping.domain.Math.roundAt
+
+class OrderItem private(
+                         val product: Product,
+                         val quantity: Int,
+                         val taxedAmount: Double,
+                         val tax: Double
+                       )
 
 object OrderItem {
-  def createOrderItem(product: Product, quantity: Int): OrderItem = {
-    val unitaryTax =
-      roundAt(2)((product.price / 100) * product.category.taxPercentage)
-    val unitaryTaxedAmount = roundAt(2)(product.price + unitaryTax)
-    val taxedAmount = roundAt(2)(unitaryTaxedAmount * quantity)
-    val taxAmount = roundAt(2)(unitaryTax * quantity)
-
+  def createOrderItem(product: Product, quantity: Int): OrderItem =
     new OrderItem(
       product = product,
       quantity = quantity,
-      taxedAmount = taxedAmount,
-      tax = taxAmount
+      taxedAmount = calculateTaxedAmount(product, quantity),
+      tax = calculateTaxAmount(product, quantity)
     )
-  }
 
-  private def roundAt(p: Int)(n: Double): Double = {
-    val s = math pow (10, p)
-    (math round n * s) / s
-  }
+  private def calculateTaxAmount(product: Product, quantity: Int): Double =
+    roundAt(2)(product.unitaryTax * quantity)
+
+  private def calculateTaxedAmount(product: Product, quantity: Int): Double =
+    roundAt(2)(product.unitaryTaxedAmount * quantity)
 }
