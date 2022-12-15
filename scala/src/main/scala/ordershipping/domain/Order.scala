@@ -5,11 +5,11 @@ import ordershipping.domain.OrderStatus.OrderStatus
 
 // TODO : make it private
 class Order(
-             var currency: String = "",
-             var items: List[OrderItem] = List.empty,
-             var status: OrderStatus,
-             var id: Int
-           ) {
+    var currency: String = "",
+    var items: List[OrderItem] = List.empty,
+    var status: OrderStatus,
+    var id: Int
+) {
   def total: Double = items.map(i => i.taxedAmount).sum
 
   def tax: Double = items.map(i => i.tax).sum
