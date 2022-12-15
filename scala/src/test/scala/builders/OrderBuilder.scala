@@ -17,11 +17,7 @@ class OrderBuilder {
 
   def rejected(): OrderBuilder = withStatus(Rejected)
 
-  def build(): Order = {
-    val order = Order.create()
-    order.status = status
-    order
-  }
+  def build(): Order = new Order(status = status, id = 1)
 }
 
 object OrderBuilder {
