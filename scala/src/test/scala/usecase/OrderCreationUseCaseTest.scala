@@ -1,7 +1,8 @@
 package usecase
 
+import builders.ProductBuilder._
 import doubles.{InMemoryProductCatalog, TestOrderRepository}
-import ordershipping.domain.{Category, OrderStatus, Product}
+import ordershipping.domain.{OrderStatus, Product}
 import ordershipping.usecase.{
   OrderCreationUseCase,
   SellItemRequest,
@@ -16,11 +17,10 @@ class OrderCreationUseCaseTest
     extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach {
-  private val food = new Category(name = "food", taxPercentage = 10)
   private val productCatalog = new InMemoryProductCatalog(
     List(
-      new Product(name = "salad", price = 3.56, category = food),
-      new Product(name = "tomato", price = 4.65, category = food)
+      food("salad").costing(3.56).build(),
+      food("tomato").costing(4.65).build()
     )
   )
   private var orderRepository: TestOrderRepository = _

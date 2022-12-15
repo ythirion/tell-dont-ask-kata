@@ -1,15 +1,15 @@
 package usecase
 
+import builders.OrderBuilder.anOrder
 import doubles.{TestOrderRepository, TestShipmentService}
 import ordershipping.domain.OrderStatus
 import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException, OrderShipmentRequest, OrderShipmentUseCase}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import usecase.OrderBuilder.anOrder
 
 class OrderShipmentUseCaseTest
-  extends AnyFlatSpec
+    extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach {
   private var orderRepository: TestOrderRepository = _
