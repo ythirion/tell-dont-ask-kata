@@ -1,6 +1,6 @@
 package ordershipping.usecase.approval
 
-import ordershipping.repository.OrderRepository
+import ordershipping.usecase.ports.repository.OrderRepository
 
 class OrderApprovalUseCase(val orderRepository: OrderRepository) {
   def run(request: OrderApprovalRequest): Unit = {

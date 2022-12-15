@@ -1,4 +1,4 @@
-package ordershipping.repository
+package ordershipping.usecase.ports.repository
 
 import ordershipping.domain.Order
 

@@ -1,7 +1,7 @@
 package ordershipping.usecase.shipment
 
-import ordershipping.repository.OrderRepository
-import ordershipping.service.ShipmentService
+import ordershipping.usecase.ports.ShipmentService
+import ordershipping.usecase.ports.repository.OrderRepository
 
 class OrderShipmentUseCase(
     val orderRepository: OrderRepository,

@@ -1,7 +1,7 @@
 package ordershipping.usecase.creation
 
 import ordershipping.domain.{Order, Product}
-import ordershipping.repository.{OrderRepository, ProductCatalog}
+import ordershipping.usecase.ports.repository.{OrderRepository, ProductCatalog}
 
 class OrderCreationUseCase(
     val orderRepository: OrderRepository,

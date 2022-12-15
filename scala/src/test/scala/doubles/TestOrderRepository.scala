@@ -1,7 +1,7 @@
 package doubles
 
 import ordershipping.domain.Order
-import ordershipping.repository.OrderRepository
+import ordershipping.usecase.ports.repository.OrderRepository
 
 import scala.collection.mutable
 

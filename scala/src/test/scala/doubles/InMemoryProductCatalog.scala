@@ -1,7 +1,7 @@
 package doubles
 
 import ordershipping.domain
-import ordershipping.repository.ProductCatalog
+import ordershipping.usecase.ports.repository.ProductCatalog
 
 class InMemoryProductCatalog(val products: List[ordershipping.domain.Product])
     extends ProductCatalog {

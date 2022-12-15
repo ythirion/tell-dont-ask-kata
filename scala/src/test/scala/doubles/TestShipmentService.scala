@@ -1,7 +1,7 @@
 package doubles
 
 import ordershipping.domain.Order
-import ordershipping.service.ShipmentService
+import ordershipping.usecase.ports.ShipmentService
 
 class TestShipmentService extends ShipmentService {
   private var orderToShip: Order = _
