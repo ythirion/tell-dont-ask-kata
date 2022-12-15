@@ -1,12 +1,15 @@
 package usecase
 
+import builders.OrderBuilder
 import builders.OrderBuilder.anOrder
 import doubles.{TestOrderRepository, TestShipmentService}
-import ordershipping.domain.OrderStatus
+import ordershipping.domain.{Order, OrderStatus}
 import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException, OrderShipmentRequest, OrderShipmentUseCase}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.reflect.ClassTag
 
 class OrderShipmentUseCaseTest
     extends AnyFlatSpec
@@ -26,50 +29,61 @@ class OrderShipmentUseCaseTest
   }
 
   "order shipment use case" should "ship approved order" in {
-    val initialOrder = anOrder().approved().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderShipmentRequest(orderId = 1)
+    val approvedOrder = anOrder().approved().build()
+    existingOrder(approvedOrder)
 
-    useCase.run(request)
+    useCase.run(
+      createShipmentRequest(approvedOrder)
+    )
 
-    val savedOrder = orderRepository.savedOrder()
-    savedOrder.status shouldBe OrderStatus.Shipped
-    shipmentService.shippedOrder() shouldBe initialOrder
+    assertSavedOrder { savedOrder =>
+      savedOrder.status shouldBe OrderStatus.Shipped
+      shipmentService.shippedOrder() shouldBe approvedOrder
+    }
   }
 
   "order shipment use case" should "can not ship created order" in {
-    val initialOrder = anOrder().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderShipmentRequest(orderId = 1)
-
-    assertThrows[OrderCannotBeShippedException] {
-      useCase.run(request)
-    }
-    orderRepository.savedOrder() shouldBe null
-    shipmentService.shippedOrder() shouldBe null
+    failFor[OrderCannotBeShippedException](
+      anOrder()
+    )
   }
 
   "order shipment use case" should "can not ship rejected order" in {
-    val initialOrder = anOrder().rejected().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderShipmentRequest(orderId = 1)
-
-    assertThrows[OrderCannotBeShippedException] {
-      useCase.run(request)
-    }
-    orderRepository.savedOrder() shouldBe null
-    shipmentService.shippedOrder() shouldBe null
+    failFor[OrderCannotBeShippedException](
+      anOrder().rejected()
+    )
   }
 
   "order shipment use case" should "can not ship again a shipped order" in {
-    val initialOrder = anOrder().shipped().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderShipmentRequest(orderId = 1)
-
-    assertThrows[OrderCannotBeShippedTwiceException] {
-      useCase.run(request)
-    }
-    orderRepository.savedOrder() shouldBe null
-    shipmentService.shippedOrder() shouldBe null
+    failFor[OrderCannotBeShippedTwiceException](
+      anOrder().shipped()
+    )
   }
+
+  private def failFor[T <: Exception](
+      orderBuilder: OrderBuilder
+  )(implicit c: ClassTag[T]): Unit = {
+    val order = orderBuilder.build()
+
+    existingOrder(order)
+
+    assertThrows[T] {
+      useCase.run(
+        createShipmentRequest(order)
+      )
+    }
+    assertSavedOrder { savedOrder =>
+      savedOrder shouldBe null
+      shipmentService.shippedOrder() shouldBe null
+    }
+  }
+
+  private def createShipmentRequest(order: Order): OrderShipmentRequest =
+    OrderShipmentRequest(orderId = order.id)
+
+  private def existingOrder(order: Order): Unit =
+    orderRepository.addOrder(order)
+
+  private def assertSavedOrder(assertions: Order => Unit): Unit =
+    assertions(orderRepository.savedOrder())
 }

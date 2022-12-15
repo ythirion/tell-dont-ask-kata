@@ -1,5 +1,6 @@
 package usecase
 
+import builders.OrderBuilder
 import builders.OrderBuilder.anOrder
 import doubles.TestOrderRepository
 import ordershipping.domain.{Order, OrderStatus}
@@ -11,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import scala.reflect.ClassTag
 
 class OrderApprovalUseCaseTest
-  extends AnyFlatSpec
+    extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach {
   private var orderRepository: TestOrderRepository = _
@@ -23,72 +24,43 @@ class OrderApprovalUseCaseTest
   }
 
   "order approval use case" should "approve existing order" in {
-    approveOrderSuccessfully(anOrder().build()) { savedOrder =>
+    approveOrderSuccessfully(anOrder()) { savedOrder =>
       savedOrder.status shouldBe OrderStatus.Approved
     }
   }
 
   "order approval use case" should "reject existing order" in {
-    rejectOrderSuccessfully(anOrder().build()) { savedOrder =>
+    rejectOrderSuccessfully(anOrder()) { savedOrder =>
       savedOrder.status shouldBe OrderStatus.Rejected
     }
   }
 
   "order approval use case" should "can not approve rejected order" in {
     approveOrderFailFor[RejectedOrderCannotBeApprovedException](
-      anOrder().rejected().build()
+      anOrder().rejected()
     )
   }
 
   "order approval use case" should "can not reject approved order" in {
     rejectOrderFailFor[ApprovedOrderCannotBeRejectedException](
-      anOrder()
-        .approved()
-        .build()
+      anOrder().approved()
     )
   }
 
   "order approval use case" should "can not reject shipped order" in {
     rejectOrderFailFor[ShippedOrdersCannotBeChangedException](
-      anOrder()
-        .shipped()
-        .build()
+      anOrder().shipped()
     )
   }
 
-  private def approveOrderFailFor[T <: Exception](order: Order)(implicit
-                                                                c: ClassTag[T]
-  ): Unit = failFor[T](order, approve = true)
-
-  private def rejectOrderFailFor[T <: Exception](order: Order)(implicit
-                                                               c: ClassTag[T]
-  ): Unit = failFor[T](order, approve = false)
-
-  private def failFor[T <: Exception](order: Order, approve: Boolean)(implicit
-                                                                      c: ClassTag[T]
-  ): Unit = {
-    existingOrder(order)
-
-    assertThrows[T] {
-      useCase.run(
-        createApprovalRequestFor(order, approve)
-      )
-    }
-    orderRepository.savedOrder() shouldBe null
-  }
-
-  private def approveOrderSuccessfully(order: Order)(
-    assertions: Order => Unit
-  ): Unit = successFor(order, approved = true)(assertions)
-
-  private def rejectOrderSuccessfully(order: Order)(
-    assertions: Order => Unit
-  ): Unit = successFor(order, approved = false)(assertions)
+  private def approveOrderSuccessfully(orderBuilder: OrderBuilder)(
+      assertions: Order => Unit
+  ): Unit = successFor(orderBuilder.build(), approved = true)(assertions)
 
   private def successFor(
-                          order: Order,
-                          approved: Boolean
-                        )(assertions: Order => Unit): Unit = {
+      order: Order,
+      approved: Boolean
+  )(assertions: Order => Unit): Unit = {
     existingOrder(order)
     useCase.run(createApprovalRequestFor(order, approved))
 
@@ -103,4 +75,29 @@ class OrderApprovalUseCaseTest
 
   private def existingOrder(order: Order): Unit =
     orderRepository.addOrder(order)
+
+  private def rejectOrderSuccessfully(orderBuilder: OrderBuilder)(
+      assertions: Order => Unit
+  ): Unit = successFor(orderBuilder.build(), approved = false)(assertions)
+
+  private def approveOrderFailFor[T <: Exception](orderBuilder: OrderBuilder)(
+      implicit c: ClassTag[T]
+  ): Unit = failFor[T](orderBuilder.build(), approve = true)
+
+  private def rejectOrderFailFor[T <: Exception](orderBuilder: OrderBuilder)(
+      implicit c: ClassTag[T]
+  ): Unit = failFor[T](orderBuilder.build(), approve = false)
+
+  private def failFor[T <: Exception](order: Order, approve: Boolean)(implicit
+      c: ClassTag[T]
+  ): Unit = {
+    existingOrder(order)
+
+    assertThrows[T] {
+      useCase.run(
+        createApprovalRequestFor(order, approve)
+      )
+    }
+    orderRepository.savedOrder() shouldBe null
+  }
 }
