@@ -2,14 +2,16 @@ package usecase
 
 import builders.OrderBuilder.anOrder
 import doubles.TestOrderRepository
-import ordershipping.domain.OrderStatus
+import ordershipping.domain.{Order, OrderStatus}
 import ordershipping.usecase._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.reflect.ClassTag
+
 class OrderApprovalUseCaseTest
-    extends AnyFlatSpec
+  extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach {
   private var orderRepository: TestOrderRepository = _
@@ -20,68 +22,85 @@ class OrderApprovalUseCaseTest
     useCase = new OrderApprovalUseCase(orderRepository)
   }
 
-  "order approval use case" should "approved existing order" in {
-    val initialOrder = anOrder().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderApprovalRequest(orderId = 1, approved = true)
-
-    useCase.run(request)
-
-    val savedOrder = orderRepository.savedOrder()
-    savedOrder.status shouldBe OrderStatus.Approved
+  "order approval use case" should "approve existing order" in {
+    approveOrderSuccessfully(anOrder().build()) { savedOrder =>
+      savedOrder.status shouldBe OrderStatus.Approved
+    }
   }
 
   "order approval use case" should "reject existing order" in {
-    val initialOrder = anOrder().build()
-    orderRepository.addOrder(initialOrder)
-    val request = OrderApprovalRequest(orderId = 1, approved = false)
-
-    useCase.run(request)
-
-    val savedOrder = orderRepository.savedOrder()
-    savedOrder.status shouldBe OrderStatus.Rejected
+    rejectOrderSuccessfully(anOrder().build()) { savedOrder =>
+      savedOrder.status shouldBe OrderStatus.Rejected
+    }
   }
 
   "order approval use case" should "can not approve rejected order" in {
-    val initialOrder = anOrder()
-      .rejected()
-      .build()
-
-    orderRepository.addOrder(initialOrder)
-    val request = OrderApprovalRequest(orderId = 1, approved = true)
-
-    assertThrows[RejectedOrderCannotBeApprovedException] {
-      useCase.run(request)
-    }
-    orderRepository.savedOrder() shouldBe null
+    approveOrderFailFor[RejectedOrderCannotBeApprovedException](
+      anOrder().rejected().build()
+    )
   }
 
   "order approval use case" should "can not reject approved order" in {
-    val initialOrder =
+    rejectOrderFailFor[ApprovedOrderCannotBeRejectedException](
       anOrder()
         .approved()
         .build()
-
-    orderRepository.addOrder(initialOrder)
-    val request = OrderApprovalRequest(orderId = 1, approved = false)
-
-    assertThrows[ApprovedOrderCannotBeRejectedException] {
-      useCase.run(request)
-    }
-    orderRepository.savedOrder() shouldBe null
+    )
   }
 
   "order approval use case" should "can not reject shipped order" in {
-    val initialOrder = anOrder()
-      .shipped()
-      .build()
+    rejectOrderFailFor[ShippedOrdersCannotBeChangedException](
+      anOrder()
+        .shipped()
+        .build()
+    )
+  }
 
-    orderRepository.addOrder(initialOrder)
-    val request = OrderApprovalRequest(orderId = 1, approved = false)
+  private def approveOrderFailFor[T <: Exception](order: Order)(implicit
+                                                                c: ClassTag[T]
+  ): Unit = failFor[T](order, approve = true)
 
-    assertThrows[ShippedOrdersCannotBeChangedException] {
-      useCase.run(request)
+  private def rejectOrderFailFor[T <: Exception](order: Order)(implicit
+                                                               c: ClassTag[T]
+  ): Unit = failFor[T](order, approve = false)
+
+  private def failFor[T <: Exception](order: Order, approve: Boolean)(implicit
+                                                                      c: ClassTag[T]
+  ): Unit = {
+    existingOrder(order)
+
+    assertThrows[T] {
+      useCase.run(
+        createApprovalRequestFor(order, approve)
+      )
     }
     orderRepository.savedOrder() shouldBe null
   }
+
+  private def approveOrderSuccessfully(order: Order)(
+    assertions: Order => Unit
+  ): Unit = successFor(order, approved = true)(assertions)
+
+  private def rejectOrderSuccessfully(order: Order)(
+    assertions: Order => Unit
+  ): Unit = successFor(order, approved = false)(assertions)
+
+  private def successFor(
+                          order: Order,
+                          approved: Boolean
+                        )(assertions: Order => Unit): Unit = {
+    existingOrder(order)
+    useCase.run(createApprovalRequestFor(order, approved))
+
+    val savedOrder = orderRepository.savedOrder()
+
+    savedOrder shouldBe order
+    assertions(savedOrder)
+  }
+
+  private def createApprovalRequestFor(order: Order, approved: Boolean) =
+    OrderApprovalRequest(orderId = order.id, approved = approved)
+
+  private def existingOrder(order: Order): Unit =
+    orderRepository.addOrder(order)
 }

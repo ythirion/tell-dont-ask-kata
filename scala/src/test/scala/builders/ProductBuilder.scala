@@ -2,10 +2,10 @@ package builders
 
 import ordershipping.domain.{Category, Product}
 
-class ProductBuilder private (
-    private val name: String,
-    private val category: Category
-) {
+class ProductBuilder private(
+                              private val name: String,
+                              private val category: Category
+                            ) {
   private var price: Double = 0d
 
   def build(): Product = new Product(name, price, category)
