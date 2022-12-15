@@ -22,12 +22,6 @@ class Order private (
     }
   }
 
-  private def ifNotShipped(continueWith: Order => Unit): Unit = {
-    if (_status == Shipped)
-      throw new ShippedOrdersCannotBeChangedException
-    continueWith(this)
-  }
-
   def reject(): Unit = {
     ifNotShipped { order =>
       order._status match {
@@ -35,6 +29,12 @@ class Order private (
         case _        => order._status = Rejected
       }
     }
+  }
+
+  private def ifNotShipped(continueWith: Order => Unit): Unit = {
+    if (_status == Shipped)
+      throw new ShippedOrdersCannotBeChangedException
+    continueWith(this)
   }
 
   // Break the dependency between Order and ShipmentService with Dependency Inversion using func arg
@@ -47,6 +47,15 @@ class Order private (
         _status = OrderStatus.Shipped
     }
   }
+
+  override def toString: String =
+    s"""
+       |Status:${_status}
+       |Currency:$currency
+       |Items:${items.mkString("{", " ; ", "}")}
+       |Tax:$tax
+       |Total:$total
+       |""".stripMargin
 
   def total: Double = items.map(i => i.taxedAmount).sum
 

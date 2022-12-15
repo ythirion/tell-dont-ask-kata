@@ -1,0 +1,6 @@
+
+Status:Created
+Currency:EUR
+Items:{Name:salad, Price:3.56, Quantity:2, Tax:0.72, TaxedAmount:7.84 ; Name:tomato, Price:4.65, Quantity:3, Tax:1.41, TaxedAmount:15.36}
+Tax:2.13
+Total:23.2

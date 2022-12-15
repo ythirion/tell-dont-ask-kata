@@ -7,7 +7,10 @@ class OrderItem private(
                          val quantity: Int,
                          val taxedAmount: Double,
                          val tax: Double
-                       )
+                       ) {
+  override def toString: String =
+    s"Name:${product.name}, Price:${product.price}, Quantity:$quantity, Tax:$tax, TaxedAmount:$taxedAmount"
+}
 
 object OrderItem {
   def createOrderItem(product: Product, quantity: Int): OrderItem =
