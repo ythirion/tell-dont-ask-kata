@@ -12,6 +12,7 @@ import ordershipping.usecase.{
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import usecase.OrderBuilder.anOrder
 
 class OrderApprovalUseCaseTest
     extends AnyFlatSpec
@@ -26,7 +27,7 @@ class OrderApprovalUseCaseTest
   }
 
   "order approval use case" should "approved existing order" in {
-    val initialOrder = new Order(status = OrderStatus.Created, id = 1)
+    val initialOrder = anOrder().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderApprovalRequest(orderId = 1, approved = true)
 
