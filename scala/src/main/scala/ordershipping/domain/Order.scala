@@ -1,18 +1,8 @@
 package ordershipping.domain
 
 import ordershipping.domain.OrderItem.createOrderItem
-import ordershipping.domain.OrderStatus.{
-  Approved,
-  Created,
-  OrderStatus,
-  Rejected,
-  Shipped
-}
-import ordershipping.service.ShipmentService
-import ordershipping.usecase.{
-  OrderCannotBeShippedException,
-  OrderCannotBeShippedTwiceException
-}
+import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejected, Shipped}
+import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException}
 
 // TODO : make it private
 class Order(
@@ -45,13 +35,13 @@ class Order(
     continueWith(this)
   }
 
-  // TODO : decouple this class from Service and Use Case exceptions
-  def ship(shipmentService: ShipmentService): Unit = {
+  // Break the dependency between Order and ShipmentService with Dependency Inversion using func arg
+  def ship(ship: Order => Unit): Unit = {
     status match {
       case Created | Rejected => throw new OrderCannotBeShippedException
       case Shipped            => throw new OrderCannotBeShippedTwiceException
       case _ =>
-        shipmentService.ship(this)
+        ship(this)
         status = OrderStatus.Shipped
     }
   }

@@ -11,7 +11,7 @@ class OrderShipmentUseCase(
     orderRepository
       .getById(request.orderId)
       .foreach(order => {
-        order.ship(shipmentService)
+        order.ship(order => shipmentService.ship(order))
         orderRepository.save(order)
       })
   }
