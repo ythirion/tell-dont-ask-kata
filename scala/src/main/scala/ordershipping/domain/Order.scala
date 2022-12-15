@@ -5,21 +5,21 @@ import ordershipping.domain.OrderStatus.OrderStatus
 
 // TODO : make it private
 class Order(
-    var total: Double = 0,
-    var currency: String = "",
-    var items: List[OrderItem] = List.empty,
-    var tax: Double = 0,
-    var status: OrderStatus,
-    var id: Int
-)
+             var currency: String = "",
+             var items: List[OrderItem] = List.empty,
+             var status: OrderStatus,
+             var id: Int
+           ) {
+  def total: Double = items.map(i => i.taxedAmount).sum
+
+  def tax: Double = items.map(i => i.tax).sum
+}
 
 object Order {
   def create(items: Map[Product, Int]): Order = {
     val order = new Order(
-      total = 0d,
       currency = "EUR",
       items = List.empty,
-      tax = 0d,
       status = OrderStatus.Created,
       id = 1
     )
@@ -28,11 +28,6 @@ object Order {
       case (product, quantity) => createOrderItem(product, quantity)
     }.toList
 
-    // TODO : calculate them instead of storing them
-    order.total = order.items.map(i => i.taxedAmount).sum
-    order.tax += order.items.map(i => i.tax).sum
-
     order
   }
-
 }
