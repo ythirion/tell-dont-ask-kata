@@ -18,10 +18,17 @@ class OrderBuilder {
   def rejected(): OrderBuilder = withStatus(Rejected)
 
   def build(): Order = {
-    val order = Order.create(Map.empty)
-    order.status = status
-    order
-    //new Order(status = status, id = 1)
+    val createdOrder = Order.create(Map.empty)
+
+    status match {
+      case Approved => createdOrder.approve()
+      case Rejected => createdOrder.reject()
+      case Shipped =>
+        createdOrder.approve()
+        createdOrder.ship(_ => {})
+      case _ =>
+    }
+    createdOrder
   }
 }
 

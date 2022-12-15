@@ -4,7 +4,6 @@ import builders.OrderBuilder
 import builders.OrderBuilder.anOrder
 import doubles.TestOrderRepository
 import ordershipping.domain._
-import ordershipping.usecase._
 import ordershipping.usecase.approval.{OrderApprovalRequest, OrderApprovalUseCase}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec

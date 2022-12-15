@@ -5,44 +5,46 @@ import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejecte
 
 import scala.collection.immutable
 
-class Order private(
-                     val currency: String = "",
-                     val items: Seq[OrderItem],
-                     var status: OrderStatus,
-                     val id: Int
-                   ) {
+class Order private (
+    val currency: String = "",
+    val items: Seq[OrderItem],
+    private var _status: OrderStatus = Created,
+    val id: Int
+) {
+  def status: OrderStatus = this._status
+
   def approve(): Unit = {
     ifNotShipped { order =>
-      order.status match {
+      order._status match {
         case Rejected => throw new RejectedOrderCannotBeApprovedException
-        case _ => order.status = Approved
-      }
-    }
-  }
-
-  def reject(): Unit = {
-    ifNotShipped { order =>
-      order.status match {
-        case Approved => throw new ApprovedOrderCannotBeRejectedException
-        case _ => order.status = Rejected
+        case _        => order._status = Approved
       }
     }
   }
 
   private def ifNotShipped(continueWith: Order => Unit): Unit = {
-    if (status == Shipped)
+    if (_status == Shipped)
       throw new ShippedOrdersCannotBeChangedException
     continueWith(this)
   }
 
+  def reject(): Unit = {
+    ifNotShipped { order =>
+      order._status match {
+        case Approved => throw new ApprovedOrderCannotBeRejectedException
+        case _        => order._status = Rejected
+      }
+    }
+  }
+
   // Break the dependency between Order and ShipmentService with Dependency Inversion using func arg
   def ship(ship: Order => Unit): Unit = {
-    status match {
+    _status match {
       case Created | Rejected => throw new OrderCannotBeShippedException
-      case Shipped => throw new OrderCannotBeShippedTwiceException
+      case Shipped            => throw new OrderCannotBeShippedTwiceException
       case _ =>
         ship(this)
-        status = OrderStatus.Shipped
+        _status = OrderStatus.Shipped
     }
   }
 
@@ -56,7 +58,7 @@ object Order {
     new Order(
       currency = "EUR",
       items = toOrderItems(items),
-      status = Created,
+      _status = Created,
       id = 1
     )
 
