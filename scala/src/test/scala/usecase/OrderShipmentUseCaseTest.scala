@@ -1,19 +1,15 @@
 package usecase
 
 import doubles.{TestOrderRepository, TestShipmentService}
-import ordershipping.domain.{Order, OrderStatus}
-import ordershipping.usecase.{
-  OrderCannotBeShippedException,
-  OrderCannotBeShippedTwiceException,
-  OrderShipmentRequest,
-  OrderShipmentUseCase
-}
+import ordershipping.domain.OrderStatus
+import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException, OrderShipmentRequest, OrderShipmentUseCase}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import usecase.OrderBuilder.anOrder
 
 class OrderShipmentUseCaseTest
-    extends AnyFlatSpec
+  extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach {
   private var orderRepository: TestOrderRepository = _
@@ -30,7 +26,7 @@ class OrderShipmentUseCaseTest
   }
 
   "order shipment use case" should "ship approved order" in {
-    val initialOrder = new Order(status = OrderStatus.Approved, id = 1)
+    val initialOrder = anOrder().approved().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderShipmentRequest(orderId = 1)
 
@@ -42,7 +38,7 @@ class OrderShipmentUseCaseTest
   }
 
   "order shipment use case" should "can not ship created order" in {
-    val initialOrder = new Order(status = OrderStatus.Created, id = 1)
+    val initialOrder = anOrder().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderShipmentRequest(orderId = 1)
 
@@ -54,7 +50,7 @@ class OrderShipmentUseCaseTest
   }
 
   "order shipment use case" should "can not ship rejected order" in {
-    val initialOrder = new Order(status = OrderStatus.Rejected, id = 1)
+    val initialOrder = anOrder().rejected().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderShipmentRequest(orderId = 1)
 
@@ -66,7 +62,7 @@ class OrderShipmentUseCaseTest
   }
 
   "order shipment use case" should "can not ship again a shipped order" in {
-    val initialOrder = new Order(status = OrderStatus.Shipped, id = 1)
+    val initialOrder = anOrder().shipped().build()
     orderRepository.addOrder(initialOrder)
     val request = OrderShipmentRequest(orderId = 1)
 
