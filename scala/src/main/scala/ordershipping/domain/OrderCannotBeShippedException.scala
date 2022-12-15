@@ -1,3 +1,3 @@
-package ordershipping.usecase
+package ordershipping.domain
 
 final case class OrderCannotBeShippedException() extends Exception

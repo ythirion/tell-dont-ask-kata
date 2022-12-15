@@ -3,8 +3,8 @@ package usecase
 import builders.OrderBuilder
 import builders.OrderBuilder.anOrder
 import doubles.{TestOrderRepository, TestShipmentService}
-import ordershipping.domain.{Order, OrderStatus}
-import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException, OrderShipmentRequest, OrderShipmentUseCase}
+import ordershipping.domain.{Order, OrderCannotBeShippedException, OrderCannotBeShippedTwiceException, OrderStatus}
+import ordershipping.usecase.{OrderShipmentRequest, OrderShipmentUseCase}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers

@@ -2,7 +2,6 @@ package ordershipping.domain
 
 import ordershipping.domain.OrderItem.createOrderItem
 import ordershipping.domain.OrderStatus.{Approved, Created, OrderStatus, Rejected, Shipped}
-import ordershipping.usecase.{OrderCannotBeShippedException, OrderCannotBeShippedTwiceException}
 
 // TODO : make it private
 class Order(
