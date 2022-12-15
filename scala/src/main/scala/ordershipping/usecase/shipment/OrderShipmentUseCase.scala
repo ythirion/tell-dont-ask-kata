@@ -1,4 +1,4 @@
-package ordershipping.usecase
+package ordershipping.usecase.shipment
 
 import ordershipping.repository.OrderRepository
 import ordershipping.service.ShipmentService
